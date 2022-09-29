@@ -20,7 +20,12 @@ cli.add_argument(
 
 def check(cli, args):
     reader = csv.DictReader(args.csvfile)
-    missing = list()
+    missing = set()
+    extra = set()
+    for finfo in os.scandir(args.dir):
+        if not finfo.is_file():
+            continue
+        extra.add(finfo.name)
     for row in reader:
         fname = row.get(args.field, None)
         if fname is None:
@@ -28,14 +33,20 @@ def check(cli, args):
         if not fname:
             # blank rows are okay
             continue
+        extra.discard(fname)
         fpath = os.path.join(args.dir, fname)
         if not os.path.isfile(fpath):
-            missing.append(fname)
-    if not missing:
+            missing.add(fname)
+    if not (missing or extra):
         cli.exit()
-    print("missing files")
-    for fname in missing:
-        print(" " * 4, fname)
+    if missing:
+        print("missing files")
+        for fname in missing:
+            print(" " * 4, fname)
+    if extra:
+        print("extraneous files")
+        for fname in extra:
+            print(" " * 4, fname)
 
 
 def show_fields(cli, args):
