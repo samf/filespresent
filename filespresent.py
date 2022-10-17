@@ -62,13 +62,13 @@ def show_fields(cli, args):
     print(f"Fields in {args.csvfile.name}")
     for field in reader.fieldnames:
         print(" " * 4, field)
-    cli.exit()
 
 
 def main():
     args = cli.parse_args()
     if not args.field:
         show_fields(cli, args)
+        cli.exit()
     if not os.path.isdir(args.dir):
         cli.error(f'"{args.dir}" is not a directory')
     check(cli, args)
