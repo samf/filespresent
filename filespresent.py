@@ -11,7 +11,11 @@ cli.add_argument(
     "csvfile", type=argparse.FileType("r"), help="csv file to read"
 )
 cli.add_argument(
-    "--field", "-f", type=str, help="field that contains the file names"
+    "--field",
+    "-f",
+    type=str,
+    action="append",
+    help="field that contains the file names; may use multiple times",
 )
 cli.add_argument(
     "--dir", "-d", type=str, help="directory to check for files", default="."
@@ -27,17 +31,18 @@ def check(cli, args):
             continue
         extra.add(finfo.name)
     for row in reader:
-        fnames = row.get(args.field, None)
-        if fnames is None:
-            cli.error(f"field {args.field} not found")
-        if not fnames:
-            # blank rows are okay
-            continue
-        for fname in fnames.split():
-            extra.discard(fname)
-            fpath = os.path.join(args.dir, fname)
-            if not os.path.isfile(fpath):
-                missing.add(fname)
+        for field in args.field:
+            fnames = row.get(field, None)
+            if fnames is None:
+                cli.error(f"field {field} not found")
+            if not fnames:
+                # blank cells are okay
+                continue
+            for fname in fnames.split():
+                extra.discard(fname)
+                fpath = os.path.join(args.dir, fname)
+                if not os.path.isfile(fpath):
+                    missing.add(fname)
     if not (missing or extra):
         cli.exit()
     if missing:
