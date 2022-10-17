@@ -27,16 +27,17 @@ def check(cli, args):
             continue
         extra.add(finfo.name)
     for row in reader:
-        fname = row.get(args.field, None)
-        if fname is None:
+        fnames = row.get(args.field, None)
+        if fnames is None:
             cli.error(f"field {args.field} not found")
-        if not fname:
+        if not fnames:
             # blank rows are okay
             continue
-        extra.discard(fname)
-        fpath = os.path.join(args.dir, fname)
-        if not os.path.isfile(fpath):
-            missing.add(fname)
+        for fname in fnames.split():
+            extra.discard(fname)
+            fpath = os.path.join(args.dir, fname)
+            if not os.path.isfile(fpath):
+                missing.add(fname)
     if not (missing or extra):
         cli.exit()
     if missing:
