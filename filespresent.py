@@ -43,8 +43,6 @@ def check(cli, args):
                 fpath = os.path.join(args.dir, fname)
                 if not os.path.isfile(fpath):
                     missing.add(fname)
-    if not (missing or extra):
-        cli.exit()
     if missing:
         print("missing files")
         for fname in missing:
